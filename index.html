@@ -34,7 +34,7 @@
   .screen.active { display:block; }
 
   /* ── HOME ── */
-  #homeScreen { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px 24px; text-align:center; }
+  #homeScreen { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:60px 24px 48px; text-align:center; }
   .home-label { font-size:11px; letter-spacing:4px; text-transform:uppercase; color:var(--gold); margin-bottom:16px; font-weight:500; }
   .home-title { font-family:'Playfair Display',serif; font-size:clamp(32px,6vw,56px); font-weight:600; color:#1a1a2e; line-height:1.15; margin-bottom:12px; }
   .home-title em { color:var(--gold); font-style:italic; }
@@ -363,7 +363,9 @@ const CAT_COLORS = {"Small Talk":"#5b9bd5","Execution (Internal)":"#70ad47","Exe
 function goTo(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  window.scrollTo({ top: 0, behavior: 'instant' });
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
+  setTimeout(() => { document.documentElement.scrollTop = 0; document.body.scrollTop = 0; }, 50);
 }
 
 // ─────────────────────────────
@@ -462,8 +464,8 @@ function revealCard(id) {
 }
 
 function toggleFlag(id) { cardState.flagged.has(id)?cardState.flagged.delete(id):cardState.flagged.add(id); renderCard(); renderStats(); renderFilters(); }
-function nextCard() { if(cardState.currentIdx<cardFiltered().length) { cardState.currentIdx++; renderCard(); window.scrollTo({top:0,behavior:'instant'}); } }
-function prevCard() { if(cardState.currentIdx>0) { cardState.currentIdx--; renderCard(); window.scrollTo({top:0,behavior:'instant'}); } }
+function nextCard() { if(cardState.currentIdx<cardFiltered().length) { cardState.currentIdx++; renderCard(); document.documentElement.scrollTop=0; document.body.scrollTop=0; } }
+function prevCard() { if(cardState.currentIdx>0) { cardState.currentIdx--; renderCard(); document.documentElement.scrollTop=0; document.body.scrollTop=0; } }
 function setCardFilter(cat) { cardState.filter=cat; cardState.currentIdx=0; renderFilters(); renderCard(); renderProgress(); }
 
 // ─────────────────────────────
