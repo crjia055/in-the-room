@@ -123,9 +123,11 @@
   @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
 
   #roleplayScreen { min-height:100vh; display:flex; flex-direction:column; }
-  .rp-top { display:flex; align-items:center; justify-content:space-between; padding:24px 32px; border-bottom:1px solid #e2e6ed; background:#ffffff; position:relative; z-index:1; }
-  .rp-title { font-family:'Playfair Display',serif; font-size:16px; color:#1a1a2e; }
+  .rp-top { display:flex; align-items:center; justify-content:space-between; padding:24px 32px; border-bottom:1px solid #e2e6ed; background:#ffffff; position:relative; z-index:1; gap:12px; }
+  .rp-title { font-family:'Playfair Display',serif; font-size:16px; color:#1a1a2e; flex-shrink:0; }
   .rp-badge { font-size:10px; letter-spacing:3px; text-transform:uppercase; color:var(--gold); font-weight:500; }
+  #voiceSelect { font-family:'DM Sans',sans-serif; font-size:12px; color:#374151; background:#f8f9fa; border:1px solid #d1d5db; border-radius:8px; padding:6px 10px; cursor:pointer; max-width:160px; outline:none; transition:border-color 0.2s; }
+  #voiceSelect:focus { border-color:var(--gold); }
   .rp-main { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px 24px; position:relative; z-index:1; }
   .rp-orb-wrap { position:relative; width:200px; height:200px; margin-bottom:40px; }
   .rp-orb { width:200px; height:200px; border-radius:50%; background:radial-gradient(circle at 40% 35%, rgba(138,106,31,0.2), rgba(240,242,245,0.9) 70%); border:1.5px solid rgba(138,106,31,0.3); display:flex; align-items:center; justify-content:center; position:relative; transition:all 0.4s; }
@@ -185,7 +187,9 @@
     .card-counter { font-size:12px; white-space:nowrap; }
 
     /* Roleplay */
-    .rp-top { padding:14px 16px; }
+    .rp-top { padding:14px 16px; gap:8px; }
+    .rp-title { font-size:14px; }
+    #voiceSelect { font-size:11px; max-width:120px; padding:5px 8px; }
     .rp-main { padding:20px 16px 12px; }
     .rp-orb-wrap { width:140px; height:140px; margin-bottom:20px; }
     .rp-orb { width:140px; height:140px; }
@@ -257,7 +261,9 @@
   <div class="rp-top">
     <button class="back-btn" onclick="goTo('homeScreen'); stopAll()">← Home</button>
     <span class="rp-title">Roleplay Mode</span>
-    <span class="rp-badge">🎙️ Audio</span>
+    <select id="voiceSelect" onchange="onVoiceChange()">
+      <option value="">Default voice</option>
+    </select>
   </div>
 
   <div class="rp-main">
@@ -357,6 +363,7 @@ const CAT_COLORS = {"Small Talk":"#5b9bd5","Execution (Internal)":"#70ad47","Exe
 function goTo(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'instant' });
 }
 
 // ─────────────────────────────
@@ -455,8 +462,8 @@ function revealCard(id) {
 }
 
 function toggleFlag(id) { cardState.flagged.has(id)?cardState.flagged.delete(id):cardState.flagged.add(id); renderCard(); renderStats(); renderFilters(); }
-function nextCard() { if(cardState.currentIdx<cardFiltered().length) { cardState.currentIdx++; renderCard(); } }
-function prevCard() { if(cardState.currentIdx>0) { cardState.currentIdx--; renderCard(); } }
+function nextCard() { if(cardState.currentIdx<cardFiltered().length) { cardState.currentIdx++; renderCard(); window.scrollTo({top:0,behavior:'instant'}); } }
+function prevCard() { if(cardState.currentIdx>0) { cardState.currentIdx--; renderCard(); window.scrollTo({top:0,behavior:'instant'}); } }
 function setCardFilter(cat) { cardState.filter=cat; cardState.currentIdx=0; renderFilters(); renderCard(); renderProgress(); }
 
 // ─────────────────────────────
@@ -474,8 +481,43 @@ let rp = {
   timerInterval: null,
   timerSecs: 0,
   ttsUtterance: null,
-  isSpeaking: false
+  isSpeaking: false,
+  selectedVoice: null
 };
+
+function populateVoices() {
+  const voices = speechSynthesis.getVoices();
+  if (!voices.length) return;
+  const sel = document.getElementById('voiceSelect');
+  sel.innerHTML = '';
+  // Prefer English voices, show all but put English first
+  const english = voices.filter(v => v.lang.startsWith('en'));
+  const others = voices.filter(v => !v.lang.startsWith('en'));
+  const sorted = [...english, ...others];
+  sorted.forEach((v, i) => {
+    const opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = `${v.name} (${v.lang})`;
+    opt.dataset.idx = voices.indexOf(v);
+    sel.appendChild(opt);
+  });
+  // Auto-select best English voice
+  const preferred = ['Samantha','Alex','Karen','Moira','Daniel','Google US English','Microsoft Aria'];
+  const best = preferred.map(n => english.find(v => v.name.includes(n))).find(Boolean) || english[0];
+  if (best) {
+    const bestOpt = Array.from(sel.options).find(o => o.textContent.startsWith(best.name));
+    if (bestOpt) { bestOpt.selected = true; rp.selectedVoice = best; }
+  }
+}
+
+function onVoiceChange() {
+  const sel = document.getElementById('voiceSelect');
+  const voices = speechSynthesis.getVoices();
+  const chosen = sel.options[sel.selectedIndex];
+  rp.selectedVoice = voices[parseInt(chosen.dataset.idx)];
+}
+
+function getVoice() { return rp.selectedVoice || null; }
 
 function rpFiltered() {
   return rp.filter === "All" ? [...SCENARIOS] : SCENARIOS.filter(s => s.cat === rp.filter);
@@ -539,12 +581,7 @@ function playScenario(text) {
   utt.lang = 'en-US';
   utt.rate = 0.92;
   utt.pitch = 1.0;
-
-  // Pick best available voice
-  const voices = speechSynthesis.getVoices();
-  const preferred = ['Samantha','Alex','Karen','Moira','Daniel','Google US English','Microsoft Aria Online'];
-  const pick = preferred.map(n => voices.find(v => v.name.includes(n))).find(Boolean);
-  if (pick) utt.voice = pick;
+  const v = getVoice(); if (v) utt.voice = v;
 
   utt.onend = () => {
     setOrb('idle','🎙️');
@@ -641,11 +678,7 @@ function playSample() {
   utt.lang = 'en-US';
   utt.rate = 0.88;
   utt.pitch = 1.0;
-
-  const voices = speechSynthesis.getVoices();
-  const preferred = ['Samantha','Alex','Karen','Moira','Daniel','Google US English','Microsoft Aria Online'];
-  const pick = preferred.map(n => voices.find(v => v.name.includes(n))).find(Boolean);
-  if (pick) utt.voice = pick;
+  const v = getVoice(); if (v) utt.voice = v;
 
   utt.onend = () => { setOrb('idle','✅'); document.getElementById('rpPhase').textContent = 'Compare and practise again!'; document.getElementById('rpHint').textContent = ''; };
   speechSynthesis.speak(utt);
@@ -672,9 +705,9 @@ function setBtn(id, enabled) {
   document.getElementById(id).disabled = !enabled;
 }
 
-// Init voices (must be triggered by user gesture in some browsers)
+// Init voices
 speechSynthesis.getVoices();
-window.speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
+window.speechSynthesis.onvoiceschanged = () => { populateVoices(); };
 </script>
 </body>
 </html>
