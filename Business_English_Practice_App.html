@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<meta name="apple-mobile-web-app-title" content="Business English"/>
+<title>Business English Practice</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --navy: #f0f2f5;
+    --navy-mid: #e4e7ec;
+    --navy-light: #d8dce4;
+    --gold: #8a6a1f;
+    --gold-light: #b08828;
+    --cream: #1a1a2e;
+    --cream-dark: #2d2d45;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --white: #ffffff;
+    --red: #c0392b;
+    --green: #1e7d4f;
+    --card-bg: #ffffff;
+    --card-border: #e2e6ed;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'DM Sans',sans-serif; background:#f0f2f5; color:#1a1a2e; min-height:100vh; overflow-x:hidden; }
+  body::before { content:''; position:fixed; inset:0; background: radial-gradient(ellipse 80% 60% at 20% 10%, rgba(138,106,31,0.05) 0%, transparent 60%); pointer-events:none; z-index:0; }
+
+  /* ── SCREENS ── */
+  .screen { display:none; position:relative; z-index:1; }
+  .screen.active { display:block; }
+
+  /* ── HOME ── */
+  #homeScreen { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px 24px; text-align:center; }
+  .home-label { font-size:11px; letter-spacing:4px; text-transform:uppercase; color:var(--gold); margin-bottom:16px; font-weight:500; }
+  .home-title { font-family:'Playfair Display',serif; font-size:clamp(32px,6vw,56px); font-weight:600; color:#1a1a2e; line-height:1.15; margin-bottom:12px; }
+  .home-title em { color:var(--gold); font-style:italic; }
+  .home-sub { font-size:14px; color:var(--muted); font-weight:300; margin-bottom:48px; display:none; }
+  .divider { width:60px; height:2px; background:linear-gradient(90deg,transparent,var(--gold),transparent); margin:0 auto 40px; }
+  .mode-cards { display:flex; gap:20px; flex-wrap:wrap; justify-content:center; max-width:680px; }
+  .mode-card { flex:1; min-width:260px; max-width:300px; background:#ffffff; border:1px solid #e2e6ed; border-radius:20px; padding:32px 28px; cursor:pointer; transition:all 0.3s ease; text-align:left; box-shadow:0 2px 12px rgba(0,0,0,0.06); }
+  .mode-card:hover { border-color:var(--gold); background:#fffdf7; transform:translateY(-3px); box-shadow:0 8px 24px rgba(138,106,31,0.12); }
+  .mode-icon { font-size:32px; margin-bottom:16px; }
+  .mode-name { font-family:'Playfair Display',serif; font-size:20px; font-weight:600; color:#1a1a2e; margin-bottom:8px; }
+  .mode-desc { font-size:13px; color:var(--muted); line-height:1.6; font-weight:300; }
+
+  /* ── CARD MODE ── */
+  #cardScreen { max-width:860px; margin:0 auto; padding:40px 24px 80px; }
+  .top-nav { display:flex; align-items:center; justify-content:space-between; margin-bottom:40px; }
+  .back-btn { background:transparent; border:1px solid #d1d5db; border-radius:8px; padding:8px 16px; color:var(--muted); font-size:12px; font-family:'DM Sans',sans-serif; cursor:pointer; transition:all 0.2s; }
+  .back-btn:hover { border-color:#9ca3af; color:#1a1a2e; }
+  .screen-title { font-family:'Playfair Display',serif; font-size:18px; color:#1a1a2e; }
+  .mode-badge { font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--gold); font-weight:500; }
+
+  header { text-align:center; margin-bottom:40px; }
+  .header-label { font-size:11px; letter-spacing:4px; text-transform:uppercase; color:var(--gold); margin-bottom:12px; font-weight:500; }
+  header h1 { font-family:'Playfair Display',serif; font-size:clamp(24px,4vw,38px); font-weight:600; color:#1a1a2e; line-height:1.2; margin-bottom:8px; }
+  header h1 em { color:var(--gold); font-style:italic; }
+  .header-sub { font-size:14px; color:var(--muted); font-weight:300; }
+  .stats-bar { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:36px; }
+  .stat-pill { background:#ffffff; border:1px solid #e2e6ed; border-radius:20px; padding:6px 16px; font-size:12px; color:var(--muted); box-shadow:0 1px 4px rgba(0,0,0,0.05); }
+  .stat-pill span { color:var(--gold); font-weight:500; }
+  .filter-section { margin-bottom:32px; }
+  .filter-label { font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--muted); margin-bottom:12px; font-weight:500; }
+  .filter-tabs { display:flex; gap:8px; flex-wrap:wrap; }
+  .filter-tab { padding:7px 16px; border-radius:6px; border:1px solid #d1d5db; background:#ffffff; color:var(--muted); font-size:12px; font-family:'DM Sans',sans-serif; cursor:pointer; transition:all 0.2s; font-weight:400; letter-spacing:0.3px; }
+  .filter-tab:hover { border-color:var(--gold); color:var(--gold); }
+  .filter-tab.active { background:#fffbf0; border-color:var(--gold); color:var(--gold); font-weight:500; }
+  .filter-tab .dot { display:inline-block; width:6px; height:6px; border-radius:50%; background:currentColor; margin-right:6px; opacity:0.7; }
+  .progress-wrap { margin-bottom:32px; }
+  .progress-meta { display:flex; justify-content:space-between; font-size:12px; color:var(--muted); margin-bottom:8px; }
+  .progress-track { height:3px; background:#e2e6ed; border-radius:2px; overflow:hidden; }
+  .progress-fill { height:100%; background:linear-gradient(90deg,var(--gold),var(--gold-light)); border-radius:2px; transition:width 0.4s ease; }
+  .card { background:#ffffff; border:1px solid #e2e6ed; border-radius:16px; overflow:hidden; margin-bottom:20px; transition:all 0.3s; box-shadow:0 2px 12px rgba(0,0,0,0.06); }
+  .card.needs-practice { border-color:rgba(192,57,43,0.4); }
+  .card-header { padding:20px 24px 16px; border-bottom:1px solid #f0f2f5; display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
+  .card-meta { flex:1; }
+  .card-category { font-size:10px; letter-spacing:3px; text-transform:uppercase; font-weight:500; margin-bottom:6px; }
+  .card-title { font-family:'Playfair Display',serif; font-size:18px; font-weight:600; color:#1a1a2e; line-height:1.3; }
+  .card-badges { display:flex; gap:6px; align-items:center; flex-shrink:0; }
+  .badge { font-size:10px; padding:3px 10px; border-radius:10px; font-weight:500; letter-spacing:0.5px; }
+  .badge-practice { background:rgba(192,57,43,0.1); color:#c0392b; border:1px solid rgba(192,57,43,0.25); }
+  .card-body { padding:20px 24px; }
+  .scenario-label { font-size:10px; letter-spacing:3px; text-transform:uppercase; color:var(--muted); margin-bottom:8px; font-weight:500; }
+  .scenario-text { font-size:14px; color:#6b7280; line-height:1.6; font-style:italic; margin-bottom:20px; font-family:'Playfair Display',serif; }
+  .reveal-area { position:relative; }
+  .reveal-blur { filter:blur(6px); transition:filter 0.4s; user-select:none; }
+  .reveal-blur.revealed { filter:none; user-select:text; }
+  .saying-box { background:#fffbf0; border-left:3px solid var(--gold); border-radius:0 8px 8px 0; padding:18px 20px; margin-bottom:16px; }
+  .saying-sentence { font-size:15px; color:#1a1a2e; line-height:1.8; font-weight:400; padding:10px 0; border-bottom:1px solid #f0ead6; }
+  .saying-sentence:last-child { border-bottom:none; padding-bottom:0; }
+  .saying-sentence:first-child { padding-top:0; }
+  .saying-sentence b { color:#6b4c0f; font-weight:700; }
+  .reveal-overlay { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(240,242,245,0.7); border-radius:8px; transition:opacity 0.3s; cursor:pointer; backdrop-filter:blur(2px); }
+  .reveal-overlay.hidden { opacity:0; pointer-events:none; }
+  .reveal-hint { text-align:center; }
+  .reveal-hint p { font-size:13px; color:var(--muted); margin-bottom:10px; }
+  .reveal-btn-inner { background:linear-gradient(135deg,var(--gold),var(--gold-light)); color:#ffffff; border:none; border-radius:8px; padding:10px 24px; font-size:13px; font-weight:600; font-family:'DM Sans',sans-serif; cursor:pointer; letter-spacing:0.5px; transition:transform 0.15s,opacity 0.15s; }
+  .reveal-btn-inner:hover { transform:scale(1.03); opacity:0.9; }
+  .card-actions { display:flex; gap:8px; justify-content:flex-end; padding-top:4px; flex-wrap:wrap; }
+  .action-btn { padding:7px 14px; border-radius:6px; font-size:12px; font-family:'DM Sans',sans-serif; cursor:pointer; font-weight:500; transition:all 0.2s; border:1px solid; letter-spacing:0.3px; }
+  .btn-flag { background:transparent; border-color:rgba(192,57,43,0.3); color:#c0392b; }
+  .btn-flag:hover { background:rgba(192,57,43,0.06); }
+  .btn-unflag { background:transparent; border-color:rgba(192,57,43,0.4); color:#c0392b; }
+  .btn-unflag:hover { background:rgba(192,57,43,0.06); }
+  .nav-controls { display:flex; gap:12px; justify-content:center; align-items:center; margin-top:8px; }
+  .nav-btn { padding:10px 28px; border-radius:8px; font-size:13px; font-family:'DM Sans',sans-serif; cursor:pointer; font-weight:500; transition:all 0.2s; border:1px solid; }
+  .nav-btn-primary { background:linear-gradient(135deg,var(--gold),var(--gold-light)); border-color:var(--gold); color:#ffffff; font-weight:600; }
+  .nav-btn-primary:hover { opacity:0.9; transform:translateY(-1px); }
+  .nav-btn-secondary { background:#ffffff; border-color:#d1d5db; color:var(--muted); }
+  .nav-btn-secondary:hover { border-color:#9ca3af; color:#1a1a2e; }
+  .nav-btn:disabled { opacity:0.3; cursor:not-allowed; transform:none !important; }
+  .card-counter { font-size:12px; color:var(--muted); }
+  .empty-state { text-align:center; padding:60px 20px; color:var(--muted); }
+  .empty-state h3 { font-family:'Playfair Display',serif; color:#1a1a2e; margin-bottom:8px; }
+  .complete-banner { text-align:center; padding:40px 20px; background:#fffbf0; border:1px solid rgba(138,106,31,0.2); border-radius:16px; margin-top:20px; }
+  .complete-banner h3 { font-family:'Playfair Display',serif; font-size:24px; color:var(--gold); margin-bottom:8px; }
+  .complete-banner p { font-size:14px; color:var(--muted); margin-bottom:20px; }
+  .fade-in { animation:fadeIn 0.35s ease forwards; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+
+  #roleplayScreen { min-height:100vh; display:flex; flex-direction:column; }
+  .rp-top { display:flex; align-items:center; justify-content:space-between; padding:24px 32px; border-bottom:1px solid #e2e6ed; background:#ffffff; position:relative; z-index:1; }
+  .rp-title { font-family:'Playfair Display',serif; font-size:16px; color:#1a1a2e; }
+  .rp-badge { font-size:10px; letter-spacing:3px; text-transform:uppercase; color:var(--gold); font-weight:500; }
+  .rp-main { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px 24px; position:relative; z-index:1; }
+  .rp-orb-wrap { position:relative; width:200px; height:200px; margin-bottom:40px; }
+  .rp-orb { width:200px; height:200px; border-radius:50%; background:radial-gradient(circle at 40% 35%, rgba(138,106,31,0.2), rgba(240,242,245,0.9) 70%); border:1.5px solid rgba(138,106,31,0.3); display:flex; align-items:center; justify-content:center; position:relative; transition:all 0.4s; }
+  .rp-orb.listening { border-color:rgba(192,57,43,0.7); background:radial-gradient(circle at 40% 35%, rgba(192,57,43,0.15), rgba(240,242,245,0.9) 70%); animation:pulse 1.5s infinite; }
+  .rp-orb.speaking { border-color:rgba(138,106,31,0.8); background:radial-gradient(circle at 40% 35%, rgba(138,106,31,0.2), rgba(240,242,245,0.9) 70%); animation:pulse-gold 1.2s infinite; }
+  @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(192,57,43,0.25)} 50%{box-shadow:0 0 0 20px rgba(192,57,43,0)} }
+  @keyframes pulse-gold { 0%,100%{box-shadow:0 0 0 0 rgba(138,106,31,0.25)} 50%{box-shadow:0 0 0 20px rgba(138,106,31,0)} }
+  .rp-orb-icon { font-size:40px; }
+  .rp-orb-ring { position:absolute; inset:-12px; border-radius:50%; border:1px solid rgba(138,106,31,0.12); }
+  .rp-orb-ring2 { position:absolute; inset:-24px; border-radius:50%; border:1px solid rgba(138,106,31,0.06); }
+  .rp-status-wrap { text-align:center; margin-bottom:40px; min-height:100px; }
+  .rp-phase { font-size:11px; letter-spacing:4px; text-transform:uppercase; color:var(--gold); margin-bottom:10px; font-weight:500; min-height:18px; }
+  .rp-scenario { font-family:'Playfair Display',serif; font-size:clamp(16px,3vw,22px); color:#1a1a2e; line-height:1.5; max-width:580px; font-style:italic; min-height:60px; }
+  .rp-hint { font-size:13px; color:var(--muted); margin-top:10px; font-weight:300; }
+  .rp-controls { display:flex; gap:16px; align-items:center; justify-content:center; flex-wrap:wrap; margin-bottom:32px; }
+  .rp-btn { display:flex; flex-direction:column; align-items:center; gap:6px; cursor:pointer; transition:all 0.2s; border:none; background:transparent; padding:0; }
+  .rp-btn:disabled { opacity:0.25; cursor:not-allowed; }
+  .rp-btn-circle { width:64px; height:64px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:22px; transition:all 0.2s; border:1.5px solid; }
+  .rp-btn:hover:not(:disabled) .rp-btn-circle { transform:scale(1.07); }
+  .rp-btn-label { font-size:11px; color:var(--muted); letter-spacing:0.5px; font-weight:400; }
+  .rp-btn-record .rp-btn-circle { background:rgba(192,57,43,0.08); border-color:rgba(192,57,43,0.4); color:#c0392b; }
+  .rp-btn-record.recording .rp-btn-circle { background:rgba(192,57,43,0.2); border-color:#c0392b; animation:pulse 1s infinite; }
+  .rp-btn-playback .rp-btn-circle { background:#f8f9fa; border-color:#d1d5db; color:#374151; }
+  .rp-btn-sample .rp-btn-circle { background:#fffbf0; border-color:rgba(138,106,31,0.35); color:var(--gold); }
+  .rp-btn-next .rp-btn-circle { background:#fffbf0; border-color:rgba(138,106,31,0.4); color:var(--gold); }
+  .rp-btn-replay .rp-btn-circle { background:#f0f7ff; border-color:rgba(59,130,246,0.3); color:#3b82f6; }
+  .rp-filter-row { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; padding:0 24px 32px; position:relative; z-index:1; }
+  .rp-filter-tab { padding:6px 14px; border-radius:20px; border:1px solid #d1d5db; background:#ffffff; color:var(--muted); font-size:11px; font-family:'DM Sans',sans-serif; cursor:pointer; transition:all 0.2s; }
+  .rp-filter-tab:hover { border-color:var(--gold); color:var(--gold); }
+  .rp-filter-tab.active { background:#fffbf0; border-color:var(--gold); color:var(--gold); font-weight:500; }
+  .rp-progress { display:flex; gap:6px; justify-content:center; padding:0 24px 24px; flex-wrap:wrap; position:relative; z-index:1; }
+  .rp-dot { width:8px; height:8px; border-radius:50%; background:#d1d5db; transition:all 0.3s; }
+  .rp-dot.done { background:var(--gold); }
+  .rp-dot.current { background:var(--gold-light); transform:scale(1.3); }
+  .rec-timer { font-size:13px; color:#c0392b; font-weight:500; min-height:20px; text-align:center; margin-bottom:8px; letter-spacing:1px; }
+
+  @media(max-width:600px){
+    /* Home */
+    #homeScreen { padding:32px 16px; justify-content:flex-start; padding-top:60px; }
+    .home-title { font-size:36px; }
+    .mode-cards { flex-direction:column; align-items:center; width:100%; }
+    .mode-card { min-width:unset; max-width:100%; width:100%; padding:24px 20px; }
+
+    /* Card mode */
+    #cardScreen > div { padding:20px 16px 100px; }
+    .top-nav { margin-bottom:20px; }
+    .stats-bar { gap:6px; }
+    .stat-pill { font-size:11px; padding:5px 12px; }
+    .filter-tabs { gap:6px; }
+    .filter-tab { font-size:11px; padding:6px 12px; }
+    .card-header { flex-direction:column; gap:6px; padding:16px; }
+    .card-body { padding:16px; }
+    .card-title { font-size:16px; }
+    .saying-sentence { font-size:14px; padding:9px 0; }
+    .nav-controls { position:fixed; bottom:0; left:0; right:0; background:#fff; border-top:1px solid #e2e6ed; padding:12px 16px; margin:0; z-index:100; box-shadow:0 -4px 16px rgba(0,0,0,0.08); }
+    .nav-btn { padding:12px 20px; font-size:13px; flex:1; text-align:center; }
+    .card-counter { font-size:12px; white-space:nowrap; }
+
+    /* Roleplay */
+    .rp-top { padding:14px 16px; }
+    .rp-main { padding:20px 16px 12px; }
+    .rp-orb-wrap { width:140px; height:140px; margin-bottom:20px; }
+    .rp-orb { width:140px; height:140px; }
+    .rp-orb-icon { font-size:32px; }
+    .rp-status-wrap { margin-bottom:20px; min-height:80px; }
+    .rp-scenario { font-size:16px; }
+    .rp-controls { gap:10px; margin-bottom:16px; }
+    .rp-btn-circle { width:56px; height:56px; font-size:20px; }
+    .rp-btn-label { font-size:10px; }
+    .rp-filter-row { padding:0 16px 16px; gap:6px; }
+    .rp-filter-tab { font-size:11px; padding:5px 11px; }
+    .rp-progress { padding:0 16px 20px; gap:5px; }
+    .rp-dot { width:7px; height:7px; }
+  }
+
+  /* Safe area for iPhone notch/home bar */
+  @supports(padding: max(0px)) {
+    .nav-controls { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+    #roleplayScreen { padding-bottom: env(safe-area-inset-bottom); }
+    #homeScreen { padding-top: max(60px, env(safe-area-inset-top)); }
+  }
+</style>
+</head>
+<body>
+
+<!-- HOME -->
+<div id="homeScreen" class="screen active">
+  <div class="home-label">Speaking Practice</div>
+  <h1 class="home-title">Business English<br/><em>in the Room</em></h1>
+  <div class="divider"></div>
+  <p class="home-sub">Investment Banking · Convertible Bond Origination</p>
+  <div class="mode-cards">
+    <div class="mode-card" onclick="goTo('cardScreen'); initCardMode()">
+      <div class="mode-icon">📋</div>
+      <div class="mode-name">Card Practice</div>
+      <div class="mode-desc">Read the scenario, try to recall the paragraph, then reveal and compare. Flag cards you want to revisit.</div>
+    </div>
+    <div class="mode-card" onclick="goTo('roleplayScreen'); initRoleplay()">
+      <div class="mode-icon">🎙️</div>
+      <div class="mode-name">Roleplay Mode</div>
+      <div class="mode-desc">Hear the scenario spoken aloud, record your response, then play back your recording or hear the sample answer.</div>
+    </div>
+  </div>
+</div>
+
+<!-- CARD MODE -->
+<div id="cardScreen" class="screen">
+  <div style="max-width:860px;margin:0 auto;padding:40px 24px 80px;position:relative;z-index:1;">
+    <div class="top-nav">
+      <button class="back-btn" onclick="goTo('homeScreen')">← Home</button>
+      <span class="mode-badge">Card Practice</span>
+    </div>
+    <div class="stats-bar" id="statsBar"></div>
+    <div class="filter-section">
+      <div class="filter-label">Filter by category</div>
+      <div class="filter-tabs" id="filterTabs"></div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-meta"><span id="progressLabel">Card 1 of 26</span><span id="progressPct">0%</span></div>
+      <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    </div>
+    <div id="cardArea"></div>
+    <div class="nav-controls" id="navControls"></div>
+  </div>
+</div>
+
+<!-- ROLEPLAY MODE -->
+<div id="roleplayScreen" class="screen">
+  <div class="rp-top">
+    <button class="back-btn" onclick="goTo('homeScreen'); stopAll()">← Home</button>
+    <span class="rp-title">Roleplay Mode</span>
+    <span class="rp-badge">🎙️ Audio</span>
+  </div>
+
+  <div class="rp-main">
+    <div class="rp-orb-wrap">
+      <div class="rp-orb" id="rpOrb">
+        <div class="rp-orb-ring"></div>
+        <div class="rp-orb-ring2"></div>
+        <span class="rp-orb-icon" id="rpOrbIcon">🎯</span>
+      </div>
+    </div>
+
+    <div class="rp-status-wrap">
+      <div class="rp-phase" id="rpPhase">Choose a category below, then press Play</div>
+      <div class="rp-scenario" id="rpScenario">Your scenario will appear here</div>
+      <div class="rp-hint" id="rpHint"></div>
+    </div>
+
+    <div class="rec-timer" id="recTimer"></div>
+
+    <div class="rp-controls">
+      <button class="rp-btn rp-btn-replay" id="btnReplayScenario" onclick="replayScenario()" disabled>
+        <div class="rp-btn-circle">🔁</div>
+        <span class="rp-btn-label">Replay</span>
+      </button>
+      <button class="rp-btn rp-btn-record" id="btnRecord" onclick="toggleRecord()" disabled>
+        <div class="rp-btn-circle">🎙️</div>
+        <span class="rp-btn-label">Record</span>
+      </button>
+      <button class="rp-btn rp-btn-playback" id="btnPlayback" onclick="playMyRecording()" disabled>
+        <div class="rp-btn-circle">▶️</div>
+        <span class="rp-btn-label">My recording</span>
+      </button>
+      <button class="rp-btn rp-btn-sample" id="btnSample" onclick="playSample()" disabled>
+        <div class="rp-btn-circle">💬</div>
+        <span class="rp-btn-label">Sample answer</span>
+      </button>
+      <button class="rp-btn rp-btn-next" id="btnNext" onclick="rpNext()" disabled>
+        <div class="rp-btn-circle">→</div>
+        <span class="rp-btn-label">Next</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="rp-filter-row" id="rpFilterRow"></div>
+  <div class="rp-progress" id="rpDots"></div>
+</div>
+
+<script>
+// ─────────────────────────────
+// DATA
+// ─────────────────────────────
+const SCENARIOS = [
+  {id:1,cat:"Small Talk",title:"Elevator catch-up after a long leave",scenario:"You've just returned from a 2-week leave and bump into a colleague in the elevator.",saying:"Hey, <b>good to be back</b>! It feels like a lot happened while I was away — I've been trying to <b>catch up on my emails</b> all morning. <b>How have things been on your end?</b> Anything I should know about? I heard there was a big team meeting last week — hope I didn't miss too much."},
+  {id:2,cat:"Small Talk",title:"Zoom small talk while waiting for others",scenario:"You're early on a Zoom call and a few colleagues are on, waiting for the host.",saying:"Morning everyone — looks like <b>we're a bit early!</b> Hope <b>the week's been treating you well.</b> I've been buried in docs all morning so this is actually a nice break. Is it just me or has it been <b>a busy few weeks across the board?</b> Anyway, should be starting soon."},
+  {id:3,cat:"Small Talk",title:"Thanks for core team member's support after leave",scenario:"You're having lunch with a colleague who held things together while you were away.",saying:"I just wanted to say — I <b>really appreciate</b> how you <b>held things together</b> while I was out. I know it wasn't easy, especially with <b>the timeline pressure</b> on that project, and <b>I don't take that for granted.</b> It made coming back so much smoother knowing things were in good hands. <b>I owe you one</b> — seriously, thank you."},
+  {id:4,cat:"Small Talk",title:"Complimenting a colleague on a deal they just closed",scenario:"A colleague just successfully closed a convertible bond deal. You run into them after the announcement.",saying:"<b>Congrats on closing</b> — that was a tough one and you guys <b>really pulled it through.</b> I saw the final terms and it came out really well <b>given where the market was.</b> You must be relieved to <b>get it over the line.</b> Well done to the whole team, but I know you were really <b>driving it from the front.</b>"},
+  {id:28,cat:"Small Talk",title:"Thanking a cross-department colleague",scenario:"A colleague from the legal or risk team put in extra effort to help you close a deal.",saying:"I just wanted to reach out and say <b>a genuine thank you</b> for everything you did on this one. I know it wasn't straightforward and there were moments where <b>things could have easily gone sideways</b> — your support really made a difference. It <b>doesn't go unnoticed</b> that you <b>went beyond what was strictly in scope,</b> and I'll absolutely remember that. Hope we get to work together again soon."},
+  {id:5,cat:"Execution (Internal)",title:"One-on-one project update with your boss",scenario:"You're giving your MD a quick one-on-one update on a live deal.",saying:"Just to <b>give you a quick update</b> — we're <b>largely on track,</b> but there are a couple of <b>moving parts I want to flag.</b> The legal review is progressing well and we're expecting the first draft from counsel <b>by end of week.</b> The main thing I'm watching is <b>the investor feedback loop</b> — we should have more colour on that by tomorrow. I'll <b>keep you posted,</b> but nothing at this stage that I'm worried about."},
+  {id:6,cat:"Execution (Internal)",title:"Pipeline report in team meeting",scenario:"You're opening your pipeline update in a weekly team meeting.",saying:"Sure, let me <b>run through where we stand</b> on the pipeline. We currently have <b>three live mandates</b> at different stages — one in documentation, one in the investor education phase, and one we're still <b>finalising terms</b> on. On the prospective side, there are two names I'm <b>cautiously optimistic</b> about, and I'll share more detail on those separately. Overall I'd say <b>the pipeline is fairly healthy</b> going into Q2."},
+  {id:7,cat:"Execution (Internal)",title:"Telling your boss the gating item",scenario:"Your MD asks what's holding up progress on a deal.",saying:"The <b>main gating item</b> right now is the <b>auditor sign-off on the comfort letter</b> — everything else is essentially ready to go. We've been <b>chasing them since Monday</b> and they've flagged a couple of clarification points which the client's finance team is working through. Once that's cleared, we can <b>move to pricing pretty quickly.</b> I'm pushing for <b>a resolution by Thursday</b> so we don't lose momentum."},
+  {id:8,cat:"Execution (Internal)",title:"Flagging a deal risk to your MD early",scenario:"You've spotted a potential issue on a live deal and want to flag it early.",saying:"I wanted to <b>flag something early</b> before it potentially becomes a bigger issue. Based on what I've been hearing from <b>the syndicate desk,</b> market sentiment has shifted a bit this week and there's some concern <b>the book might be slower to build</b> than we anticipated. <b>It's not a crisis yet,</b> but I think we should discuss whether we want to <b>adjust the timing or the size.</b> Happy to walk you through what I've been hearing if it's helpful."},
+  {id:9,cat:"Execution (Internal)",title:"Asking your MD for guidance",scenario:"You're navigating a sensitive situation with a co-manager bank and want your MD's steer.",saying:"I wanted to <b>get your read</b> on something before I respond. The co-manager came back with a view that I think is a bit off, but I'm not sure <b>how hard to push</b> given the <b>relationship dynamics.</b> I have a perspective on how I'd handle it, but I'd rather <b>align with you first</b> before I go back to them. <b>Do you have a couple of minutes to talk it through?</b>"},
+  {id:10,cat:"Execution (Internal)",title:"Giving feedback to an analyst on a draft",scenario:"An analyst has sent over a first draft of a pitchbook section that needs rework.",saying:"Thanks for getting this over — I can see you <b>put effort into it.</b> The data is all there, which is great. My <b>main feedback is on the structure</b> — right now it reads a bit like <b>a data dump,</b> and we need to make <b>the narrative clearer</b> for the client. Let me show you what I mean on a couple of slides, and then I'd like you to <b>take another pass</b> with that framing in mind. Come find me if you have questions."},
+  {id:11,cat:"Execution (Internal)",title:"Debriefing the team after a deal closes",scenario:"The deal just priced and you're wrapping up with the core team.",saying:"I just want to take a moment to say — <b>well done everyone, genuinely.</b> This was not an easy deal and the team <b>really stepped up when it mattered.</b> There were a few bumpy moments along the way but we held it together and <b>delivered a good outcome for the client.</b> Let's <b>take a breath</b> this week, and then early next week we should do a proper <b>debrief to capture what worked</b> and what we'd do differently."},
+  {id:12,cat:"Execution (Internal)",title:"Pushing back on an unrealistic internal deadline",scenario:"Another internal team has set a deadline that doesn't account for your workload.",saying:"<b>I hear you on the urgency,</b> and I want to be helpful here — but I do want to flag that <b>the timeline as proposed</b> is going to be <b>very tight for our side</b> given what else is live right now. If we commit to Thursday and then miss it, <b>that's worse than resetting expectations now.</b> Can we talk about what's truly <b>a hard deadline</b> versus what has a bit of flex? I'm confident we can <b>find something that works for both teams.</b>"},
+  {id:13,cat:"Execution (External)",title:"Cross-bank call: quick intro and calibration",scenario:"You're on an early call with the syndicate team from another bank to align on market views.",saying:"Thanks everyone for jumping on — <b>I'll keep this brief.</b> The main reason we wanted to get on a call was to do <b>a quick calibration</b> before we move into the more formal process. We have a view on where the market is, but wanted to <b>get your read too,</b> especially given what you've been seeing on the demand side. Happy to <b>share our thinking first</b> if that's useful, and then we can <b>compare notes.</b>"},
+  {id:14,cat:"Execution (External)",title:"Cross-bank call: when we get into debate",scenario:"There's a disagreement on the call about the appropriate discount rate for the deal.",saying:"I appreciate the perspective, and <b>I don't want to dismiss it</b> — but I do think there are a few things worth <b>pushing back on.</b> The comp set we're looking at <b>suggests a tighter range</b> than what you're proposing, and I want to make sure we're not <b>leaving room on the table</b> unnecessarily. I'm not saying we're definitely right, but I think it's worth <b>spending a few more minutes on this</b> before we move on. Can we <b>walk through the comps together?</b>"},
+  {id:15,cat:"Execution (External)",title:"Pushing back on a co-manager's proposed term",scenario:"The co-manager is pushing for a term you believe is unfavourable for the issuer.",saying:"I want to <b>respectfully push back on that.</b> From where we sit, the proposed term is <b>more conservative than what the current market conditions warrant,</b> and I think the issuer would be <b>understandably concerned</b> if we went in at that level. We've done a few comparable transactions recently and in each case <b>the market was able to absorb more favourable terms.</b> I'd like us to <b>look at this again</b> before we go back to the client — I think <b>we have more room than this.</b>"},
+  {id:16,cat:"Execution (External)",title:"Kicking off a deal kickoff call",scenario:"You're running the opening of a formal deal kickoff call with all working parties.",saying:"Thanks everyone for joining — <b>let's get started.</b> The purpose of today's call is to <b>align on the deal structure, assign workstreams,</b> and set clear deadlines so everyone knows what they're responsible for and when. I'll give a brief overview of where we are, and then I'd like to <b>go through the key workstreams one by one.</b> Please <b>jump in with questions</b> as we go — it's important we <b>leave this call with clarity on next steps.</b>"},
+  {id:17,cat:"Execution (External)",title:"Wrapping up a weekly progress update call",scenario:"You're closing out a regular progress call with all deal parties.",saying:"Okay, I think <b>we've covered everything on the agenda.</b> To summarise: legal is <b>on track</b> to deliver the revised draft by Friday, we'll have the updated financial model to the team by Wednesday, and both sides have agreed to <b>reconnect Thursday afternoon</b> if there are any open items. <b>Does anyone have anything else before we close out?</b> If not, thanks everyone — <b>same time next week</b> unless I reach out to reschedule."},
+  {id:18,cat:"Execution (External)",title:"Chasing counsel on a delayed document",scenario:"Counsel is late delivering a key document and the deal timeline is at risk.",saying:"Hi — I wanted to <b>follow up</b> on the prospectus draft, which we were expecting yesterday. I understand things get busy, and <b>I don't want to add pressure unnecessarily,</b> but I do need to flag that we're now starting to <b>feel the timeline impact</b> on our end. Is there anything we can do on our side to <b>help unblock this?</b> Even a partial draft would be helpful at this stage. Can we get <b>a sense of when we can expect it?</b>"},
+  {id:19,cat:"Execution (External)",title:"Handling a technical issue on a call",scenario:"There's a sudden tech glitch mid-call — someone's audio drops or slides stop working.",saying:"<b>Apologies for the interruption</b> — it looks like we're having <b>a brief technical issue on our end.</b> Bear with us for just a moment while we sort this out. In the meantime, why don't we <b>continue the discussion without the slides</b> — I can walk through the key points verbally and <b>we'll share the deck right after the call.</b> <b>Thanks for your patience</b> — really appreciate it."},
+  {id:29,cat:"Execution (External)",title:"Reconnecting with an external lawyer",scenario:"You're reaching out to a counsel you worked with a year ago on a past transaction.",saying:"<b>Great to reconnect</b> — it's been a while since we worked together on that deal last year. I was thinking about it the other day actually; that was quite <b>a challenging execution</b> but I thought the team handled it really well. I'd love to <b>catch up properly</b> at some point — and separately, I have <b>something new in the pipeline</b> that I think might be relevant for your team. Let me know if you'd be open to <b>a quick call sometime this week.</b>"},
+  {id:20,cat:"Pitch (Reporting)",title:"Asking your boss how his client meeting went",scenario:"Your MD just came back from a client meeting you didn't attend.",saying:"<b>How did the meeting go?</b> I'd love to hear how they reacted, especially to the structure we proposed. Were there any <b>questions or concerns</b> from the client that came up? Once I know <b>where they landed,</b> I can start thinking about what we need to prepare as <b>follow-up</b> — whether it's revised terms, additional analysis, or just a summary note. Happy to <b>get things moving</b> as soon as I have your steer."},
+  {id:21,cat:"Pitch (Reporting)",title:"Volunteering to cover a client meeting",scenario:"You've noticed your MD and senior director both have a conflict for an upcoming client meeting.",saying:"I noticed there might be <b>a gap on coverage</b> for the client meeting next Tuesday given the scheduling conflict. I wanted to <b>put my hand up</b> — I'm free and I'm <b>across the deal,</b> so I'm happy to attend and <b>represent the team</b> if that would be useful. Obviously I'd want to make sure <b>you're comfortable with that</b> and aligned on the key messages first. Just wanted to flag it so we don't <b>leave the client without anyone.</b>"},
+  {id:22,cat:"Pitch (Reporting)",title:"Reporting back on a meeting your boss didn't attend",scenario:"You just came back from a client meeting you attended without your MD.",saying:"Just wanted to <b>debrief you</b> on how the meeting went. Overall I'd say it was <b>positive</b> — the client was <b>engaged and asked good questions,</b> which I think signals genuine interest. The main thing that came up was around the timeline — they flagged some <b>internal board constraints</b> we weren't fully aware of. I've noted everything down and I have a few thoughts on how we should respond, but <b>wanted to get your take first</b> before we go back to them."},
+  {id:23,cat:"Pitch (Reporting)",title:"Handling an unexpected client question mid-pitch",scenario:"A client asks a detailed technical question during the pitch that you weren't expecting.",saying:"<b>That's a great question</b> — and an important one. Let me make sure I give you <b>a precise answer rather than speculate.</b> The short answer is yes, that mechanism <b>can accommodate what you're describing,</b> but there are a few <b>structural nuances</b> I'd like to walk you through so we're on the same page. If you'll <b>bear with me for a moment</b> — I want to make sure I give you <b>the full picture</b> on this one."},
+  {id:24,cat:"Pitch (Reporting)",title:"Flagging that a pitch angle might not land",scenario:"You've been in the room with this client before and sense the current pitch angle is wrong.",saying:"I wanted to <b>raise something</b> before we finalise the deck. Based on the conversations I've had with this client before, I'm not sure <b>the angle we're leading with</b> is going to <b>resonate with them.</b> They tend to be quite <b>conservative and very focused on downside protection</b> — I think if we lead with the equity upside story, <b>we risk losing them early.</b> Can we talk about whether it's worth <b>adjusting the narrative?</b> I have a few ideas on how we might <b>reframe it.</b>"},
+  {id:25,cat:"Pitch (Internal)",title:"Cross-department kickoff for a big RFP",scenario:"You're running a kickoff call with working-level staff from different teams to divide up a pitchbook.",saying:"Thanks for joining everyone — <b>let's dive in.</b> We have a <b>fairly aggressive timeline</b> on this one, so the goal today is to make sure <b>everyone knows exactly what they own</b> and when it's due. I'll walk through <b>the overall structure of the book</b> first so we all have the same picture, and then we'll <b>go section by section and assign owners.</b> Please <b>flag immediately</b> if you have capacity concerns — I'd rather know now than on deadline day."},
+  {id:26,cat:"Pitch (Internal)",title:"Pitchbook review — directing analysts",scenario:"You're reviewing a pitchbook draft in a working session with the analysts.",saying:"Overall <b>the content is in good shape</b> — the research team has done a solid job on the market backdrop. My <b>main concern is the flow.</b> Right now the book <b>doesn't build a clear argument</b> — it presents facts without <b>connecting them to a recommendation.</b> What I want us to do is <b>restructure so each section feeds naturally into the next</b> and the client can see the logic. Let's go through it <b>slide by slide</b> and I'll tell you what needs to move and what needs <b>a cleaner headline.</b>"},
+  {id:27,cat:"Pitch (Internal)",title:"Clarifying a misunderstood brief with an analyst",scenario:"The analyst has gone in a completely different direction from what you asked for.",saying:"I can see what you were going for here, and I think <b>the instinct was right</b> — but I want to clarify because I think there may have been <b>a miscommunication in the brief.</b> What we actually need is <b>a comparison across different conversion premium structures,</b> not across different maturities. I know that's <b>a meaningful rework</b> and I'm sorry if I wasn't clear enough upfront. Let me <b>walk you through exactly what I'm looking for</b> and then we can figure out <b>the fastest way to get there.</b>"}
+];
+
+const CATEGORIES = ["All", ...new Set(SCENARIOS.map(s => s.cat))];
+
+function splitSentences(html) {
+  // Split on sentence-ending punctuation (. ! ?) followed by space or end, but not inside tags
+  // Strategy: split on punctuation that's followed by a space+capital or end of string
+  const parts = html.split(/(?<=[.!?])\s+(?=[A-Z<])/);
+  return parts.map(s => s.trim()).filter(Boolean);
+}
+const CAT_COLORS = {"Small Talk":"#5b9bd5","Execution (Internal)":"#70ad47","Execution (External)":"#ed7d31","Pitch (Reporting)":"#9b59b6","Pitch (Internal)":"#e74c3c"};
+
+// ─────────────────────────────
+// NAVIGATION
+// ─────────────────────────────
+function goTo(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ─────────────────────────────
+// CARD MODE
+// ─────────────────────────────
+let cardState = { filter:"All", flagged:new Set(), revealed:new Set(), currentIdx:0 };
+
+function initCardMode() { renderStats(); renderFilters(); renderCard(); }
+
+function cardFiltered() {
+  return cardState.filter === "All" ? SCENARIOS
+    : cardState.filter === "⚑ Needs Practice" ? SCENARIOS.filter(s => cardState.flagged.has(s.id))
+    : SCENARIOS.filter(s => s.cat === cardState.filter);
+}
+
+function renderStats() {
+  document.getElementById('statsBar').innerHTML = `
+    <div class="stat-pill"><span>${SCENARIOS.length}</span> total</div>
+    <div class="stat-pill"><span>${cardState.revealed.size}</span> reviewed</div>
+    <div class="stat-pill"><span>${cardState.flagged.size}</span> flagged</div>`;
+}
+
+function renderFilters() {
+  const tabs = [...CATEGORIES, "⚑ Needs Practice"];
+  document.getElementById('filterTabs').innerHTML = tabs.map(cat => `
+    <button class="filter-tab ${cardState.filter===cat?'active':''}" onclick="setCardFilter('${cat}')">
+      <span class="dot"></span>${cat}
+    </button>`).join('');
+}
+
+function renderCard() {
+  const list = cardFiltered();
+  const cardArea = document.getElementById('cardArea');
+  const navControls = document.getElementById('navControls');
+  if (!list.length) { cardArea.innerHTML=`<div class="empty-state"><h3>No cards</h3><p>No scenarios match this filter.</p></div>`; navControls.innerHTML=''; return; }
+  if (cardState.currentIdx >= list.length) {
+    cardArea.innerHTML=`<div class="complete-banner fade-in"><h3>Section complete ✦</h3><p>You've been through all ${list.length} cards.</p><button class="nav-btn nav-btn-primary" onclick="cardState.currentIdx=0;renderCard()">Start over</button></div>`;
+    navControls.innerHTML=''; renderProgress(); return;
+  }
+  const s = list[cardState.currentIdx];
+  const isRevealed = cardState.revealed.has(s.id);
+  const isFlagged = cardState.flagged.has(s.id);
+  const color = CAT_COLORS[s.cat]||'#c9a84c';
+  cardArea.innerHTML = `
+    <div class="card ${isFlagged?'needs-practice':''} fade-in">
+      <div class="card-header">
+        <div class="card-meta">
+          <div class="card-category" style="color:${color}">${s.cat}</div>
+          <div class="card-title">${s.title}</div>
+        </div>
+        <div class="card-badges">${isFlagged?'<span class="badge badge-practice">⚑ Practice</span>':''}</div>
+      </div>
+      <div class="card-body">
+        <div class="scenario-label">The situation</div>
+        <div class="scenario-text">${s.scenario}</div>
+        <div class="reveal-area">
+          <div class="saying-box ${isRevealed?'':'reveal-blur'}" id="sayingBox">
+            ${splitSentences(s.saying).map(sent => `<div class="saying-sentence">${sent}</div>`).join('')}
+          </div>
+          <div class="reveal-overlay ${isRevealed?'hidden':''}" id="revealOverlay" onclick="revealCard(${s.id})">
+            <div class="reveal-hint">
+              <p>Try saying it out loud first, then reveal</p>
+              <button class="reveal-btn-inner">Reveal paragraph ↓</button>
+            </div>
+          </div>
+        </div>
+        ${isRevealed?`<div class="card-actions"><button class="action-btn ${isFlagged?'btn-unflag':'btn-flag'}" onclick="toggleFlag(${s.id})">${isFlagged?'✕ Remove flag':'⚑ Needs practice'}</button></div>`:''}
+      </div>
+    </div>`;
+  navControls.innerHTML = `
+    <button class="nav-btn nav-btn-secondary" onclick="prevCard()" ${cardState.currentIdx===0?'disabled':''}>← Previous</button>
+    <span class="card-counter">${cardState.currentIdx+1} / ${list.length}</span>
+    <button class="nav-btn nav-btn-primary" onclick="nextCard()" ${cardState.currentIdx>=list.length-1?'disabled':''}>Next →</button>`;
+  renderProgress();
+}
+
+function renderProgress() {
+  const list = cardFiltered();
+  const pct = !list.length ? 0 : Math.round((cardState.currentIdx/list.length)*100);
+  document.getElementById('progressLabel').textContent = !list.length ? 'No cards' : `Card ${Math.min(cardState.currentIdx+1,list.length)} of ${list.length}`;
+  document.getElementById('progressPct').textContent = pct+'%';
+  document.getElementById('progressFill').style.width = pct+'%';
+}
+
+function revealCard(id) {
+  cardState.revealed.add(id);
+  document.getElementById('sayingBox').classList.remove('reveal-blur');
+  document.getElementById('revealOverlay').classList.add('hidden');
+  const list = cardFiltered();
+  const s = list[cardState.currentIdx];
+  const isFlagged = cardState.flagged.has(s.id);
+  const el = document.createElement('div'); el.className='card-actions';
+  el.innerHTML=`<button class="action-btn ${isFlagged?'btn-unflag':'btn-flag'}" onclick="toggleFlag(${s.id})">${isFlagged?'✕ Remove flag':'⚑ Needs practice'}</button>`;
+  document.querySelector('.card-body').appendChild(el);
+  renderStats();
+}
+
+function toggleFlag(id) { cardState.flagged.has(id)?cardState.flagged.delete(id):cardState.flagged.add(id); renderCard(); renderStats(); renderFilters(); }
+function nextCard() { if(cardState.currentIdx<cardFiltered().length) { cardState.currentIdx++; renderCard(); } }
+function prevCard() { if(cardState.currentIdx>0) { cardState.currentIdx--; renderCard(); } }
+function setCardFilter(cat) { cardState.filter=cat; cardState.currentIdx=0; renderFilters(); renderCard(); renderProgress(); }
+
+// ─────────────────────────────
+// ROLEPLAY MODE
+// ─────────────────────────────
+let rp = {
+  filter: "All",
+  list: [],
+  idx: 0,
+  mediaRecorder: null,
+  audioChunks: [],
+  recordingBlob: null,
+  recordingUrl: null,
+  isRecording: false,
+  timerInterval: null,
+  timerSecs: 0,
+  ttsUtterance: null,
+  isSpeaking: false
+};
+
+function rpFiltered() {
+  return rp.filter === "All" ? [...SCENARIOS] : SCENARIOS.filter(s => s.cat === rp.filter);
+}
+
+function initRoleplay() {
+  rp.filter = "All";
+  rp.idx = 0;
+  rp.recordingBlob = null;
+  rp.recordingUrl = null;
+  renderRpFilters();
+  renderRpDots();
+  setRpReady();
+}
+
+function renderRpFilters() {
+  const tabs = ["All", ...new Set(SCENARIOS.map(s => s.cat))];
+  document.getElementById('rpFilterRow').innerHTML = tabs.map(cat => `
+    <button class="rp-filter-tab ${rp.filter===cat?'active':''}" onclick="setRpFilter('${cat}')">${cat}</button>`).join('');
+}
+
+function setRpFilter(cat) {
+  stopAll();
+  rp.filter = cat; rp.idx = 0;
+  rp.recordingBlob = null; rp.recordingUrl = null;
+  renderRpFilters(); renderRpDots(); setRpReady();
+}
+
+function renderRpDots() {
+  const list = rpFiltered();
+  document.getElementById('rpDots').innerHTML = list.map((s,i) => `
+    <div class="rp-dot ${i<rp.idx?'done':i===rp.idx?'current':''}"></div>`).join('');
+}
+
+function setRpReady() {
+  const list = rpFiltered();
+  if (!list.length) return;
+  const s = list[rp.idx];
+  setOrb('idle','🎯');
+  document.getElementById('rpPhase').textContent = 'Scenario ' + (rp.idx+1) + ' of ' + list.length;
+  document.getElementById('rpScenario').textContent = s.scenario;
+  document.getElementById('rpHint').textContent = 'Press Play to hear the scenario, then record your response.';
+  setBtn('btnReplayScenario', true);
+  setBtn('btnRecord', false);
+  setBtn('btnPlayback', false);
+  setBtn('btnSample', false);
+  setBtn('btnNext', list.length > 1);
+  document.getElementById('recTimer').textContent = '';
+  // Auto-play scenario
+  setTimeout(() => playScenario(s.scenario), 400);
+}
+
+function playScenario(text) {
+  stopTTS();
+  setOrb('speaking','🔊');
+  document.getElementById('rpPhase').textContent = 'Listen to the scenario...';
+  document.getElementById('rpHint').textContent = 'Prepare what you want to say.';
+  setBtn('btnRecord', false);
+
+  const utt = new SpeechSynthesisUtterance(text);
+  utt.lang = 'en-US';
+  utt.rate = 0.92;
+  utt.pitch = 1.0;
+
+  // Pick best available voice
+  const voices = speechSynthesis.getVoices();
+  const preferred = ['Samantha','Alex','Karen','Moira','Daniel','Google US English','Microsoft Aria Online'];
+  const pick = preferred.map(n => voices.find(v => v.name.includes(n))).find(Boolean);
+  if (pick) utt.voice = pick;
+
+  utt.onend = () => {
+    setOrb('idle','🎙️');
+    document.getElementById('rpPhase').textContent = 'Your turn — record your response';
+    document.getElementById('rpHint').textContent = 'Press the microphone to start recording.';
+    setBtn('btnRecord', true);
+  };
+  rp.ttsUtterance = utt;
+  speechSynthesis.speak(utt);
+}
+
+function replayScenario() {
+  const list = rpFiltered();
+  const s = list[rp.idx];
+  playScenario(s.scenario);
+}
+
+function stopTTS() { speechSynthesis.cancel(); }
+
+function stopAll() {
+  stopTTS();
+  if (rp.isRecording) stopRecording();
+  clearInterval(rp.timerInterval);
+  document.getElementById('recTimer').textContent = '';
+}
+
+async function toggleRecord() {
+  if (rp.isRecording) { stopRecording(); return; }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    rp.audioChunks = [];
+    rp.mediaRecorder = new MediaRecorder(stream);
+    rp.mediaRecorder.ondataavailable = e => { if(e.data.size>0) rp.audioChunks.push(e.data); };
+    rp.mediaRecorder.onstop = () => {
+      rp.recordingBlob = new Blob(rp.audioChunks, { type:'audio/webm' });
+      rp.recordingUrl = URL.createObjectURL(rp.recordingBlob);
+      stream.getTracks().forEach(t => t.stop());
+      setOrb('idle','✅');
+      document.getElementById('rpPhase').textContent = 'Recording saved';
+      document.getElementById('rpHint').textContent = 'Play back your recording or hear the sample answer.';
+      setBtn('btnPlayback', true);
+      setBtn('btnSample', true);
+      document.getElementById('btnRecord').querySelector('.rp-btn-label').textContent = 'Re-record';
+    };
+    rp.mediaRecorder.start();
+    rp.isRecording = true;
+    rp.timerSecs = 0;
+    document.getElementById('btnRecord').classList.add('recording');
+    document.getElementById('btnRecord').querySelector('.rp-btn-label').textContent = 'Stop';
+    setOrb('listening','🔴');
+    document.getElementById('rpPhase').textContent = 'Recording...';
+    document.getElementById('rpHint').textContent = 'Speak your response, then press Stop.';
+    rp.timerInterval = setInterval(() => {
+      rp.timerSecs++;
+      const m = Math.floor(rp.timerSecs/60).toString().padStart(2,'0');
+      const s = (rp.timerSecs%60).toString().padStart(2,'0');
+      document.getElementById('recTimer').textContent = `⏺ ${m}:${s}`;
+    }, 1000);
+  } catch(e) {
+    document.getElementById('rpPhase').textContent = 'Microphone access denied';
+    document.getElementById('rpHint').textContent = 'Please allow microphone access in your browser settings.';
+  }
+}
+
+function stopRecording() {
+  if (rp.mediaRecorder && rp.isRecording) {
+    rp.mediaRecorder.stop();
+    rp.isRecording = false;
+    document.getElementById('btnRecord').classList.remove('recording');
+    clearInterval(rp.timerInterval);
+    document.getElementById('recTimer').textContent = '';
+  }
+}
+
+function playMyRecording() {
+  if (!rp.recordingUrl) return;
+  stopTTS();
+  setOrb('speaking','▶️');
+  document.getElementById('rpPhase').textContent = 'Playing your recording...';
+  const audio = new Audio(rp.recordingUrl);
+  audio.onended = () => { setOrb('idle','✅'); document.getElementById('rpPhase').textContent = 'How did it sound?'; };
+  audio.play();
+}
+
+function playSample() {
+  const list = rpFiltered();
+  const s = list[rp.idx];
+  stopTTS();
+  setOrb('speaking','💬');
+  document.getElementById('rpPhase').textContent = 'Sample answer...';
+  document.getElementById('rpHint').textContent = 'Listen and compare with your recording.';
+
+  const utt = new SpeechSynthesisUtterance(s.saying.replace(/<[^>]+>/g, ''));
+  utt.lang = 'en-US';
+  utt.rate = 0.88;
+  utt.pitch = 1.0;
+
+  const voices = speechSynthesis.getVoices();
+  const preferred = ['Samantha','Alex','Karen','Moira','Daniel','Google US English','Microsoft Aria Online'];
+  const pick = preferred.map(n => voices.find(v => v.name.includes(n))).find(Boolean);
+  if (pick) utt.voice = pick;
+
+  utt.onend = () => { setOrb('idle','✅'); document.getElementById('rpPhase').textContent = 'Compare and practise again!'; document.getElementById('rpHint').textContent = ''; };
+  speechSynthesis.speak(utt);
+}
+
+function rpNext() {
+  stopAll();
+  const list = rpFiltered();
+  rp.idx = (rp.idx + 1) % list.length;
+  rp.recordingBlob = null; rp.recordingUrl = null;
+  setBtn('btnPlayback', false);
+  setBtn('btnSample', false);
+  renderRpDots();
+  setRpReady();
+}
+
+function setOrb(state, icon) {
+  const orb = document.getElementById('rpOrb');
+  orb.className = 'rp-orb' + (state!=='idle' ? ' '+state : '');
+  document.getElementById('rpOrbIcon').textContent = icon;
+}
+
+function setBtn(id, enabled) {
+  document.getElementById(id).disabled = !enabled;
+}
+
+// Init voices (must be triggered by user gesture in some browsers)
+speechSynthesis.getVoices();
+window.speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
+</script>
+</body>
+</html>
